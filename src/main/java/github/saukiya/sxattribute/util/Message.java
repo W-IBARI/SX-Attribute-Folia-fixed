@@ -149,7 +149,7 @@ public enum Message {
 
         default List<String> getStringList(String loc, Object... args) {
             List<String> list = getConfig().getStringList(loc);
-            if (list.size() == 0) return Collections.singletonList("Null: " + loc);
+            if (list.isEmpty()) return Collections.singletonList("Null: " + loc);
             IntStream.range(0, list.size()).forEach(i -> list.set(i, MessageFormat.format(list.get(i), args).replace("&", "§")));
             return list;
         }
@@ -159,7 +159,7 @@ public enum Message {
         }
 
         default void send(LivingEntity entity, String msg) {
-            MessageUtil.getInst().send(entity, msg);
+            MessageUtil.send(entity, msg);
         }
     }
 }

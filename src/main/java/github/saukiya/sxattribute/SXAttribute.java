@@ -27,7 +27,8 @@ import github.saukiya.tools.util.LogUtil;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.SneakyThrows;
-import org.bstats.bukkit.Metrics;
+// Klop233 - Remove bstats to prevent ClassNotDefError
+// import org.bstats.bukkit.Metrics;
 import org.bukkit.Bukkit;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -187,7 +188,8 @@ public class SXAttribute extends JavaPlugin {
 
     @Override
     public void onEnable() {
-        new Metrics(this, 3147);
+        // Klop233 - Remove bstats to prevent ClassNotDefError
+        // new Metrics(this, 3147);
         long oldTimes = System.currentTimeMillis();
         PlaceholderUtil.setup();
 

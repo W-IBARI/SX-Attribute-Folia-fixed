@@ -3,6 +3,7 @@ main: github.saukiya.sxattribute.SXAttribute
 version: $version
 author: Saukiya & Ray_Hughes
 api-version: 1.13
+folia-supported: true
 
 depend:
 - SX-Item

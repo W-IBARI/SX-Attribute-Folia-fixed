@@ -1,7 +1,7 @@
 name: SX-Attribute
 main: github.saukiya.sxattribute.SXAttribute
 version: $version
-author: Saukiya & Ray_Hughes
+authors: [Saukiya, Ray_Hughes, Klop233]
 api-version: 1.13
 folia-supported: true
 

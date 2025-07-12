@@ -24,7 +24,6 @@ import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.inventory.EntityEquipment;
 import org.bukkit.inventory.ItemStack;
-import org.spigotmc.SpigotConfig;
 
 import java.util.Arrays;
 import java.util.List;
@@ -171,8 +170,11 @@ public class Damage extends SubAttribute{
 
     @Override
     public void correct(double[] values) {
-        values[0] = Math.min(Math.max(values[0], Config.isDamageGauges() ? 1 : 0), SpigotConfig.attackDamage);
-        values[1] = Math.min(values[1], SpigotConfig.attackDamage);
+//        values[0] = Math.min(Math.max(values[0], Config.isDamageGauges() ? 1 : 0), SpigotConfig.attackDamage);
+//        values[1] = Math.min(values[1], SpigotConfig.attackDamage);
+        // Do not limit it
+        values[0] = Math.max(values[0], Config.isDamageGauges() ? 1 : 0);
+        values[1] = Math.min(values[1], 2048);
         values[1] = Math.max(values[1], values[0]);
         values[2] = Math.max(values[2], 0);
         values[3] = Math.max(values[3], values[2]);

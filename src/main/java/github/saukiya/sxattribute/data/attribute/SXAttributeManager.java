@@ -134,7 +134,7 @@ public class SXAttributeManager implements Listener {
      * @param entity Player
      */
     public void attributeUpdateEvent(LivingEntity entity) {
-        Bukkit.getScheduler().runTask(SXAttribute.getInst(), () -> {
+        Bukkit.getGlobalRegionScheduler().run(SXAttribute.getInst(), (t) -> {
             UpdateData updateData = new UpdateData(entity);
             SXAttributeData attributeData = getEntityData(entity);
             for (SubAttribute attribute : SubAttribute.getAttributes()) {

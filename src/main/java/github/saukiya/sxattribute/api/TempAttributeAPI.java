@@ -13,7 +13,7 @@ public class TempAttributeAPI {
     private static final ConcurrentHashMap<UUID, ConcurrentHashMap<String, Tuple<SXAttributeData, Long>>> cache = new ConcurrentHashMap<>();
 
     public static void startUpdate() {
-        Bukkit.getScheduler().runTaskTimerAsynchronously(SXAttribute.getInst(), TempAttributeAPI::update, 0L, 20L);
+        Bukkit.getGlobalRegionScheduler().runAtFixedRate(SXAttribute.getInst(), (t) -> update(), 1L, 20L);
     }
 
     private static void update() {

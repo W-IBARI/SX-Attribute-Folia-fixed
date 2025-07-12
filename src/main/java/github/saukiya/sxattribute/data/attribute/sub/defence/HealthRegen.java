@@ -4,6 +4,7 @@ import github.saukiya.sxattribute.SXAttribute;
 import github.saukiya.sxattribute.data.attribute.AttributeType;
 import github.saukiya.sxattribute.data.attribute.SubAttribute;
 import github.saukiya.sxattribute.data.eventdata.EventData;
+import io.papermc.paper.threadedregions.scheduler.ScheduledTask;
 import org.bukkit.Bukkit;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.LivingEntity;
@@ -22,36 +23,7 @@ import java.util.List;
  */
 public class HealthRegen extends SubAttribute {
 
-    private BukkitRunnable runnable = new BukkitRunnable() {
-        @Override
-        public void run() {
-            try {
-                for (Player player : new ArrayList<>(Bukkit.getOnlinePlayers())) {
-                    if (player != null && !player.isDead() && player.isOnline()) {
-                        double maxHealth = SXAttribute.getApi().getMaxHealth(player);
-                        if (player.getHealth() < maxHealth) {
-                            double healthRegen = SXAttribute.getApi().getEntityData(player).getValues(getName())[0];
-                            if (healthRegen > 0) {
-                                EntityRegainHealthEvent event = new EntityRegainHealthEvent(player, healthRegen, EntityRegainHealthEvent.RegainReason.CUSTOM);
-                                Bukkit.getPluginManager().callEvent(event);
-                                if (!event.isCancelled()) {
-                                    healthRegen = (event.getAmount() + player.getHealth()) > maxHealth ? (maxHealth - player.getHealth()) : event.getAmount();
-                                    player.setHealth(healthRegen + player.getHealth());
-                                }
-                            }
-                        }
-                    }
-                }
-            } catch (Exception e) {
-                e.printStackTrace();
-                SXAttribute.getInst().getLogger().warning("生命恢复系统崩溃 正在重新启动!");
-                this.cancel();
-                HealthRegen.this.onEnable();
-                SXAttribute.getInst().getLogger().warning("启动完毕!");
-                SXAttribute.getInst().getLogger().warning("如果此消息连续刷屏，请反馈作者QQ: 1940208750");
-            }
-        }
-    };
+    private ScheduledTask runnable;
 
 
     /**
@@ -72,7 +44,34 @@ public class HealthRegen extends SubAttribute {
 
     @Override
     public void onEnable() {
-        runnable.runTaskTimer(getPlugin(), 19, 20);
+        runnable = Bukkit.getGlobalRegionScheduler().runAtFixedRate(getPlugin(), (t) -> {
+            try {
+                for (Player player : new ArrayList<>(Bukkit.getOnlinePlayers())) {
+                    if (player != null && !player.isDead() && player.isOnline()) {
+                        double maxHealth = SXAttribute.getApi().getMaxHealth(player);
+                        if (player.getHealth() < maxHealth) {
+                            double healthRegen = SXAttribute.getApi().getEntityData(player).getValues(getName())[0];
+                            if (healthRegen > 0) {
+                                EntityRegainHealthEvent event = new EntityRegainHealthEvent(player, healthRegen, EntityRegainHealthEvent.RegainReason.CUSTOM);
+                                Bukkit.getPluginManager().callEvent(event);
+                                if (!event.isCancelled()) {
+                                    healthRegen = (event.getAmount() + player.getHealth()) > maxHealth ? (maxHealth - player.getHealth()) : event.getAmount();
+                                    player.setHealth(healthRegen + player.getHealth());
+                                }
+                            }
+                        }
+                    }
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+                SXAttribute.getInst().getLogger().warning("生命恢复系统崩溃 正在重新启动!");
+                t.cancel();
+                HealthRegen.this.onEnable();
+                SXAttribute.getInst().getLogger().warning("启动完毕!");
+                SXAttribute.getInst().getLogger().warning("如果此消息连续刷屏，请反馈作者QQ: 1940208750");
+            }
+        }, 19, 20);
+        // runnable.runTaskTimer(getPlugin(), 19, 20);
     }
 
     @Override

@@ -123,7 +123,7 @@ public class ListenerUpdateAttribute implements Listener {
         if (NMS.compareTo(1,9,0) >= 0) {
             entity.setInvulnerable(true);
         }
-        Bukkit.getScheduler().runTaskLaterAsynchronously(SXAttribute.getInst(), () -> {
+        Bukkit.getGlobalRegionScheduler().runDelayed(SXAttribute.getInst(), (t) -> {
             if (entity != null && !entity.isDead()) {
                 SXAttribute.getAttributeManager().loadEntityData(entity);
                 SXAttribute.getAttributeManager().attributeUpdateEvent(entity);

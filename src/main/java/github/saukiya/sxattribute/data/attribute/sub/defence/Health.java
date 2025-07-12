@@ -13,7 +13,7 @@ import org.bukkit.attribute.Attribute;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
-import org.spigotmc.SpigotConfig;
+// import org.spigotmc.SpigotConfig;
 
 import java.util.Arrays;
 import java.util.List;
@@ -121,7 +121,8 @@ public class Health extends SubAttribute {
     @Override
     public void correct(double[] values) {
         values[0] = Math.max(values[0], 1D);
-        values[0] = Math.min(values[0], SpigotConfig.maxHealth);
+        // Do not limit it
+        // values[0] = Math.min(values[0], SpigotConfig.maxHealth);
     }
 
     @Override

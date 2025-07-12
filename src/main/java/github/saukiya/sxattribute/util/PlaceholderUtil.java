@@ -4,11 +4,13 @@ import github.saukiya.sxattribute.SXAttribute;
 import github.saukiya.sxattribute.data.attribute.SXAttributeData;
 import github.saukiya.sxattribute.data.attribute.SubAttribute;
 import github.saukiya.tools.helper.PlaceholderHelper;
+import io.papermc.paper.threadedregions.scheduler.ScheduledTask;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitTask;
+import org.bukkit.util.Consumer;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -21,14 +23,18 @@ public class PlaceholderUtil {
 
     static Map<UUID, SXAttributeData> dataMap = new HashMap<>();
     
-    static BukkitTask task;
+    // static BukkitTask task;
+    static ScheduledTask taskFolia;
 
     public static void setup() {
         PlaceholderHelper.setup(SXAttribute.getInst(), "sx", inst::onPlaceholderRequest);
-        if (task != null) {
-            Bukkit.getScheduler().cancelTask(task.getTaskId());
+        if (taskFolia != null) {
+            taskFolia.cancel();
         }
-        task = Bukkit.getScheduler().runTaskTimer(SXAttribute.getInst(), ()-> dataMap.clear(), 20, 20);
+        taskFolia = Bukkit.getGlobalRegionScheduler().runAtFixedRate(SXAttribute.getInst(), (t) -> {
+            dataMap.clear();
+        }, 20, 20);
+        // task = Bukkit.getScheduler().runTaskTimer(SXAttribute.getInst(), ()-> dataMap.clear(), 20, 20);
     }
 
     public String onPlaceholderRequest(Player player, String string) {

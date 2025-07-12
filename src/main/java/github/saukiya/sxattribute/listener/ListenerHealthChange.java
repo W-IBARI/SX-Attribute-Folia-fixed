@@ -6,6 +6,7 @@ import github.saukiya.sxattribute.SXAttribute;
 import github.saukiya.sxattribute.util.Config;
 import github.saukiya.sxattribute.util.Message;
 import github.saukiya.tools.nms.NMS;
+import io.papermc.paper.threadedregions.scheduler.ScheduledTask;
 import lombok.Getter;
 import lombok.Setter;
 import org.bukkit.Bukkit;
@@ -32,7 +33,7 @@ import java.util.List;
 /**
  * @author Saukiya
  */
-public class ListenerHealthChange extends BukkitRunnable implements Listener {
+public class ListenerHealthChange implements Listener, Runnable {
 
     @Getter
     private List<BossBarData> bossList = new ArrayList<>();
@@ -42,9 +43,10 @@ public class ListenerHealthChange extends BukkitRunnable implements Listener {
 
     @Getter
     private List<HoloData> holoList = new ArrayList<>();
+    private ScheduledTask foliaTask;
 
     public ListenerHealthChange() {
-        runTaskTimer(SXAttribute.getInst(), 20, 20);
+        foliaTask = Bukkit.getGlobalRegionScheduler().runAtFixedRate(SXAttribute.getInst(), (t) -> run(), 20, 20);
     }
 
     @Override
@@ -77,9 +79,7 @@ public class ListenerHealthChange extends BukkitRunnable implements Listener {
         }
     }
 
-    @Override
     public synchronized void cancel() throws IllegalStateException {
-        super.cancel();
         for (BossBarData bossBarData : getBossList()) {
             bossBarData.getBossBar().removeAll();
         }

@@ -6,6 +6,7 @@ import github.saukiya.sxattribute.data.attribute.SubAttribute;
 import github.saukiya.sxattribute.data.eventdata.EventData;
 import github.saukiya.sxattribute.data.eventdata.sub.UpdateData;
 import github.saukiya.tools.helper.PlaceholderHelper;
+import me.klop233.sxattribute.util.Utils;
 import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
 import org.bukkit.configuration.file.YamlConfiguration;
@@ -179,7 +180,10 @@ public class Command extends SubAttribute implements Listener {
                 if (command.startsWith("delay ")) {
                     delay = Integer.parseInt(command.substring(6));
                 } else {
-                    Bukkit.getScheduler().runTaskLater(getPlugin(), () -> Bukkit.dispatchCommand(sender, PlaceholderHelper.setPlaceholders(player, command.replace("%player%", player.getName()))), delay);
+                    Bukkit.getGlobalRegionScheduler().runDelayed(getPlugin(),
+                            (t) -> Bukkit.dispatchCommand(
+                                    sender, PlaceholderHelper.setPlaceholders(player, command.replace("%player%", player.getName()))
+                            ), delay);
                 }
             }
         }
@@ -190,7 +194,7 @@ public class Command extends SubAttribute implements Listener {
                 if (command.startsWith("delay ")) {
                     delay = Integer.parseInt(command.substring(6));
                 } else {
-                    Bukkit.getScheduler().runTaskLater(getPlugin(), () -> {
+                    Utils.hackRunDelayed(getPlugin(), (t) -> {
                         for (String playerName : players) {
                             Player player = Bukkit.getPlayerExact(playerName);
                             if (player != null) {
@@ -200,8 +204,7 @@ public class Command extends SubAttribute implements Listener {
                     }, delay);
                 }
             }
-            Bukkit.getScheduler().runTaskLater(getPlugin(), this::run, delay == 0 ? 20 : delay);
+            Utils.hackRunDelayed(getPlugin(), (t) -> run(), delay);
         }
     }
-
 }

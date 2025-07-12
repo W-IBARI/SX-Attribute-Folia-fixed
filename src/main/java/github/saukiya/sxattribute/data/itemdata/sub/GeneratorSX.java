@@ -18,8 +18,4 @@ public class GeneratorSX extends github.saukiya.sxitem.data.item.impl.GeneratorD
     protected ItemStack getItem(Player player, Object... args) {
         return super.getItem(player, args);
     }
-
-    public static class SXExpressionHandler extends ExpressionHandler {
-
-    }
 }

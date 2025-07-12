@@ -8,6 +8,7 @@ import github.saukiya.tools.nms.NMS;
 import org.bukkit.Bukkit;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Arrow;
+import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -49,13 +50,10 @@ public class ListenerUpdateAttribute implements Listener {
      * @param player Player
      */
     private void updateEquipmentData(Player player) {
-        new BukkitRunnable() {
-            @Override
-            public void run() {
-                SXAttribute.getAttributeManager().loadEntityData(player);
-                SXAttribute.getAttributeManager().attributeUpdateEvent(player);
-            }
-        }.runTaskAsynchronously(SXAttribute.getInst());
+        player.getScheduler().run(SXAttribute.getInst(), (t) -> {
+            SXAttribute.getAttributeManager().loadEntityData(player);
+            SXAttribute.getAttributeManager().attributeUpdateEvent(player);
+        }, null);
     }
 
     @EventHandler(ignoreCancelled = true)
@@ -123,7 +121,7 @@ public class ListenerUpdateAttribute implements Listener {
         if (NMS.compareTo(1,9,0) >= 0) {
             entity.setInvulnerable(true);
         }
-        Bukkit.getGlobalRegionScheduler().runDelayed(SXAttribute.getInst(), (t) -> {
+        entity.getScheduler().runDelayed(SXAttribute.getInst(), (t) -> {
             if (entity != null && !entity.isDead()) {
                 SXAttribute.getAttributeManager().loadEntityData(entity);
                 SXAttribute.getAttributeManager().attributeUpdateEvent(entity);
@@ -131,7 +129,7 @@ public class ListenerUpdateAttribute implements Listener {
                     entity.setInvulnerable(false);
                 }
             }
-        }, 10);
+        }, null, 10);
     }
 
     @EventHandler

@@ -10,6 +10,7 @@ import github.saukiya.sxattribute.data.eventdata.sub.DamageData;
 import github.saukiya.sxattribute.event.SXDamageEvent;
 import github.saukiya.sxattribute.util.Config;
 import lombok.Getter;
+import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.event.EventHandler;
@@ -35,20 +36,17 @@ public class EventMessage extends SubAttribute implements Listener {
     public void onEnable() {
         if (SXAttribute.isHolographic()) {
             holoList = new ArrayList<>();
-            new BukkitRunnable() {
-                @Override
-                public void run() {
-                    double moveDistance = 0.1D / Config.getConfig().getInt(Config.HOLOGRAPHIC_DISPLAY_TIME);
-                    for (int i = holoList.size() - 1; i >= 0; i--) {
-                        HoloData holoData = holoList.get(i);
-                        if (holoData.getClearTime() < System.currentTimeMillis()) {
-                            holoData.delete();
-                        } else {
-                            holoData.getHologram().teleport(holoData.getHologram().getLocation().add(0, moveDistance, 0));
-                        }
+            Bukkit.getGlobalRegionScheduler().runAtFixedRate(getPlugin(), (t) -> {
+                double moveDistance = 0.1D / Config.getConfig().getInt(Config.HOLOGRAPHIC_DISPLAY_TIME);
+                for (int i = holoList.size() - 1; i >= 0; i--) {
+                    HoloData holoData = holoList.get(i);
+                    if (holoData.getClearTime() < System.currentTimeMillis()) {
+                        holoData.delete();
+                    } else {
+                        holoData.getHologram().teleport(holoData.getHologram().getLocation().add(0, moveDistance, 0));
                     }
                 }
-            }.runTaskTimer(getPlugin(), 20, 2);
+            }, 20, 2);
         }
     }
 

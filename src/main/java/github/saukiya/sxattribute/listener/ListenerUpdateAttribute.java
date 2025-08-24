@@ -136,11 +136,12 @@ public class ListenerUpdateAttribute implements Listener {
     void onEntityDeathEvent(EntityDeathEvent event) {
         if (event.getEntity() instanceof Arrow) {
             Util.info(" >The Arrow is Death");
+
             if (SXAttribute.getAttributeManager().getEntityDataMap().containsKey(event.getEntity().getUniqueId())) {
                 Util.info("  >this has Attribute");
-                YamlConfiguration yaml;
             }
         }
+
         if (!(event.getEntity() instanceof Player)) {
             SXAttribute.getAttributeManager().clearEntityData(event.getEntity().getUniqueId());
         }

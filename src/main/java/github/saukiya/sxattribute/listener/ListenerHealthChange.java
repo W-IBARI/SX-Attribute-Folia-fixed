@@ -2,6 +2,7 @@ package github.saukiya.sxattribute.listener;
 
 import com.gmail.filoghost.holographicdisplays.api.Hologram;
 import com.gmail.filoghost.holographicdisplays.api.HologramsAPI;
+import com.google.common.collect.Lists;
 import github.saukiya.sxattribute.SXAttribute;
 import github.saukiya.sxattribute.util.Config;
 import github.saukiya.sxattribute.util.Message;
@@ -14,10 +15,7 @@ import org.bukkit.Location;
 import org.bukkit.boss.BarColor;
 import org.bukkit.boss.BarStyle;
 import org.bukkit.boss.BossBar;
-import org.bukkit.entity.ArmorStand;
-import org.bukkit.entity.LivingEntity;
-import org.bukkit.entity.Player;
-import org.bukkit.entity.Projectile;
+import org.bukkit.entity.*;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
@@ -36,14 +34,14 @@ import java.util.List;
 public class ListenerHealthChange implements Listener, Runnable {
 
     @Getter
-    private List<BossBarData> bossList = new ArrayList<>();
+    private List<BossBarData> bossList = Lists.newCopyOnWriteArrayList();
 
     @Getter
-    private List<NameData> nameList = new ArrayList<>();
+    private List<NameData> nameList = Lists.newCopyOnWriteArrayList();
 
     @Getter
-    private List<HoloData> holoList = new ArrayList<>();
-    private ScheduledTask foliaTask;
+    private List<HoloData> holoList = Lists.newCopyOnWriteArrayList();
+    private final ScheduledTask foliaTask;
 
     public ListenerHealthChange() {
         foliaTask = Bukkit.getGlobalRegionScheduler().runAtFixedRate(SXAttribute.getInst(), (t) -> run(), 20, 20);
@@ -51,46 +49,67 @@ public class ListenerHealthChange implements Listener, Runnable {
 
     @Override
     public void run() {
-        for (int i = bossList.size() - 1; i >= 0; i--) {
-            BossBarData bossBarData = bossList.get(i);
+        for (int i = this.bossList.size() - 1; i >= 0; i--) {
+            BossBarData bossBarData = this.bossList.get(i);
+
             if (bossBarData.getEntity() == null || bossBarData.getEntity().isDead()) {
                 bossBarData.getBossBar().removeAll();
-                bossList.remove(i);
+                this.bossList.remove(i);
                 continue;
             }
-            if (bossBarData.clearExpired().getList().size() == 0) {
-                bossList.remove(i);
+
+            if (bossBarData.clearExpired().getList().isEmpty()) {
+                this.bossList.remove(i);
             }
         }
-        for (int i = nameList.size() - 1; i >= 0; i--) {
-            NameData nameData = nameList.get(i);
-            if (nameData.getEntity() == null || nameData.getEntity().isDead() || nameData.getEntity().getHealth() == SXAttribute.getApi().getMaxHealth(nameData.getEntity()) || nameData.getClearTime() < System.currentTimeMillis()) {
-                if (nameData.getEntity() != null) {
-                    nameData.getEntity().setCustomName(nameData.getName());
-                    nameData.getEntity().setCustomNameVisible(nameData.isVisible());
+
+        for (int i = this.nameList.size() - 1; i >= 0; i--) {
+            NameData nameData = this.nameList.get(i);
+            final LivingEntity entity = nameData.getEntity();
+
+            if (entity == null || entity.isDead() || entity.getHealth() == SXAttribute.getApi().getMaxHealth(entity) || nameData.getClearTime() < System.currentTimeMillis()) {
+                if (entity != null) {
+                    entity.getScheduler().execute(this.foliaTask.getOwningPlugin(), () -> {
+                        entity.setCustomName(nameData.getName());
+                        entity.setCustomNameVisible(nameData.isVisible());
+                    }, null, 1L);
                 }
-                nameList.remove(i);
+
+                this.nameList.remove(i);
             }
         }
-        for (int i = holoList.size() - 1; i >= 0; i--) {
-            if (holoList.get(i).clearTime < System.currentTimeMillis()) {
-                holoList.remove(i).getHologram().delete();
+
+        for (int i = this.holoList.size() - 1; i >= 0; i--) {
+            final HoloData holoData = this.holoList.get(i);
+            if (holoData.clearTime < System.currentTimeMillis()) {
+                this.holoList.remove(i);
+
+                final Hologram hologram = holoData.getHologram();
+
+                Bukkit.getRegionScheduler().execute(SXAttribute.getInst(), hologram.getLocation(), hologram::delete);
             }
         }
     }
 
-    public synchronized void cancel() throws IllegalStateException {
+    public void cancel() throws IllegalStateException {
         for (BossBarData bossBarData : getBossList()) {
             bossBarData.getBossBar().removeAll();
         }
+
         for (NameData nameData : getNameList()) {
-            if (nameData.getEntity() != null && !nameData.getEntity().isDead()) {
-                nameData.getEntity().setCustomName(nameData.getName());
-                nameData.getEntity().setCustomNameVisible(nameData.isVisible());
+            final LivingEntity entity = nameData.getEntity();
+            if (entity != null && !entity.isDead()) {
+                entity.getScheduler().execute(SXAttribute.getInst(), () -> {
+                    entity.setCustomName(nameData.getName());
+                    entity.setCustomNameVisible(nameData.isVisible());
+                }, null, 1L);
             }
         }
+
         for (HoloData data : getHoloList()) {
-            data.getHologram().delete();
+            final Hologram hologram = data.getHologram();
+
+            Bukkit.getRegionScheduler().execute(SXAttribute.getInst(), hologram.getLocation(), hologram::delete);
         }
     }
 

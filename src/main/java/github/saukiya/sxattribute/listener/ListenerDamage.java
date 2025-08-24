@@ -34,10 +34,13 @@ public class ListenerDamage implements Listener {
     @EventHandler
     void onProjectileHitEvent(EntityShootBowEvent event) {
         if (event.isCancelled()) return;
+
         Entity projectile = event.getProjectile();
         LivingEntity entity = event.getEntity();
+
         if (entity instanceof LivingEntity) {
             SXAttribute.getApi().setProjectileData(projectile.getUniqueId(), SXAttribute.getAttributeManager().getEntityData(entity));
+
             ItemStack item = event.getBow();
             if (item != null && SubCondition.isUnbreakable(item.getItemMeta())) {
                 Bukkit.getPluginManager().callEvent(new PlayerItemDamageEvent((Player) entity, item, 1));

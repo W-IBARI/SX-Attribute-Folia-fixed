@@ -109,12 +109,12 @@ public class SellCommand extends SXAttributeCommand implements Listener {
                             enterMeta.setDisplayName(Message.getMsg(Message.INVENTORY__SELL__NO_SELL));
                         } else {
                             enterMeta.setDisplayName(Message.getMsg(Message.INVENTORY__SELL__ENTER));
-                            enterMeta.addEnchant(Enchantment.DURABILITY, 1, true);
+                            enterMeta.addEnchant(Enchantment.UNBREAKING, 1, true);
                         }
                     } else {
                         enterMeta.setDisplayName(Message.getMsg(Message.INVENTORY__SELL__OUT, sell));
                         enterMeta.setLore(new ArrayList<>());
-                        enterMeta.removeEnchant(Enchantment.DURABILITY);
+                        enterMeta.removeEnchant(Enchantment.UNBREAKING);
                         MoneyUtil.give(player, sell);
                         Message.send(player, Message.PLAYER__SELL, size, sell);
                     }
@@ -122,7 +122,7 @@ public class SellCommand extends SXAttributeCommand implements Listener {
                     return;
                 }
             }
-            enterMeta.removeEnchant(Enchantment.DURABILITY);
+            enterMeta.removeEnchant(Enchantment.UNBREAKING);
             enterMeta.setDisplayName(Message.getMsg(Message.INVENTORY__SELL__SELL));
             enterMeta.setLore(Message.getStringList(Message.INVENTORY__SELL__LORE__DEFAULT));
             enterItem.setItemMeta(enterMeta);

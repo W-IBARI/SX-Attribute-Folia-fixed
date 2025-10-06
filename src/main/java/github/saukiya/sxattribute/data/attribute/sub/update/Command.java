@@ -6,6 +6,7 @@ import github.saukiya.sxattribute.data.attribute.SubAttribute;
 import github.saukiya.sxattribute.data.eventdata.EventData;
 import github.saukiya.sxattribute.data.eventdata.sub.UpdateData;
 import github.saukiya.tools.helper.PlaceholderHelper;
+import me.klop233.sxattribute.util.Utils;
 import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
 import org.bukkit.configuration.file.YamlConfiguration;
@@ -179,7 +180,7 @@ public class Command extends SubAttribute implements Listener {
                 if (command.startsWith("delay ")) {
                     delay = Integer.parseInt(command.substring(6));
                 } else {
-                    Bukkit.getGlobalRegionScheduler().runDelayed(getPlugin(),
+                    Utils.hackRunDelayed(getPlugin(),
                             (t) -> Bukkit.dispatchCommand(
                                     sender, PlaceholderHelper.setPlaceholders(player, command.replace("%player%", player.getName()))
                             ), delay);
@@ -203,7 +204,7 @@ public class Command extends SubAttribute implements Listener {
                     });
                 }
             }
-            Bukkit.getGlobalRegionScheduler().runDelayed(getPlugin(), (t) -> run(), delay);
+            Utils.hackRunDelayed(getPlugin(), (t) -> run(), delay);
         }
     }
 }

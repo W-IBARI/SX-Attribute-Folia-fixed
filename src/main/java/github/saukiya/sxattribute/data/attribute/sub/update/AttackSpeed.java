@@ -71,7 +71,7 @@ public class AttackSpeed extends SubAttribute implements Listener {
             Player player = (Player) ((UpdateData) eventData).getEntity();
 
             if (NMS.compareTo(1,9,0) >= 0) {
-                player.getAttribute(Attribute.GENERIC_ATTACK_SPEED).setBaseValue(getConfig().getDouble("AttackSpeed.Default") * (100 + values[0]) / 100);
+                player.getAttribute(Attribute.ATTACK_DAMAGE).setBaseValue(getConfig().getDouble("AttackSpeed.Default") * (100 + values[0]) / 100);
             } else {
                 player.setWalkSpeed((float) (values[0] / 500.0D));
             }

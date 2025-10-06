@@ -228,7 +228,7 @@ public class SXAPI {
     }
 
     public double getMaxHealth(LivingEntity entity) {
-        return NMS.compareTo(1, 9, 0) >= 0 ? entity.getAttribute(Attribute.GENERIC_MAX_HEALTH).getBaseValue() : entity.getMaxHealth();
+        return NMS.compareTo(1, 9, 0) >= 0 ? entity.getAttribute(Attribute.MAX_HEALTH).getBaseValue() : entity.getMaxHealth();
     }
 
     /**

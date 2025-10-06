@@ -97,14 +97,14 @@ public class RepairCommand extends SXAttributeCommand implements Listener {
                                     double money = (maxDurability - durability) * value;
                                     if (!enterMeta.hasEnchants()) {
                                         if (MoneyUtil.has(player, money)) {
-                                            enterMeta.addEnchant(Enchantment.DURABILITY, 1, true);
+                                            enterMeta.addEnchant(Enchantment.UNBREAKING, 1, true);
                                             enterMeta.setDisplayName(Message.getMsg(Message.INVENTORY__REPAIR__MONEY));
                                         } else {
                                             enterMeta.setDisplayName(Message.getMsg(Message.INVENTORY__REPAIR__NO_MONEY));
                                         }
                                         enterMeta.setLore(Message.getStringList(Message.INVENTORY__REPAIR__LORE__MONEY, maxDurability - durability, money, value));
                                     } else {
-                                        enterMeta.removeEnchant(Enchantment.DURABILITY);
+                                        enterMeta.removeEnchant(Enchantment.UNBREAKING);
                                         if (MoneyUtil.has(player, money)) {
                                             MoneyUtil.take(player, money);
                                             enterMeta.setDisplayName(Message.getMsg(Message.INVENTORY__REPAIR__REPAIR, money));
@@ -126,7 +126,7 @@ public class RepairCommand extends SXAttributeCommand implements Listener {
                             }
                         }
                     }
-                    enterMeta.removeEnchant(Enchantment.DURABILITY);
+                    enterMeta.removeEnchant(Enchantment.UNBREAKING);
                     enterMeta.setDisplayName(Message.getMsg(Message.INVENTORY__REPAIR__UNSUITED));
                     enterMeta.setLore(Message.getStringList(Message.INVENTORY__REPAIR__LORE__ENTER, value));
                     enterItem.setItemMeta(enterMeta);
@@ -134,7 +134,7 @@ public class RepairCommand extends SXAttributeCommand implements Listener {
                 }
 
             }
-            enterMeta.removeEnchant(Enchantment.DURABILITY);
+            enterMeta.removeEnchant(Enchantment.UNBREAKING);
             enterMeta.setDisplayName(Message.getMsg(Message.INVENTORY__REPAIR__ENTER));
             enterMeta.setLore(Message.getStringList(Message.INVENTORY__REPAIR__LORE__ENTER, value));
             enterItem.setItemMeta(enterMeta);

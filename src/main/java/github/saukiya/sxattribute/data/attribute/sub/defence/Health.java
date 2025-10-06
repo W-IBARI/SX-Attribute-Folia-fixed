@@ -58,7 +58,7 @@ public class Health extends SubAttribute {
             double maxHealth = values[0] + getSkillAPIHealth(player);
             if (player.getHealth() > maxHealth) player.setHealth(maxHealth);
             if (NMS.compareTo(1,9,0) >= 0) {
-                player.getAttribute(Attribute.GENERIC_MAX_HEALTH).setBaseValue(maxHealth);
+                player.getAttribute(Attribute.MAX_HEALTH).setBaseValue(maxHealth);
             } else {
                 player.setMaxHealth(maxHealth);
             }

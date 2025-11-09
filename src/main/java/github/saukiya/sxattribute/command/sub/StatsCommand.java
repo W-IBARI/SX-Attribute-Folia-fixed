@@ -161,6 +161,7 @@ public class StatsCommand extends SXAttributeCommand implements Listener {
 
     @EventHandler
     void onInventoryClickStatsEvent(InventoryClickEvent event) {
+        if (event.getInventory().getHolder() == null) return;
         if (!event.isCancelled() && event.getInventory().getHolder().equals(holder)) {
             if (event.getRawSlot() < 0) {
                 event.getView().getPlayer().closeInventory();

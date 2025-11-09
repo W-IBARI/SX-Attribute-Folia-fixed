@@ -253,6 +253,7 @@ public class SXAttribute extends JavaPlugin {
         Bukkit.getPluginManager().registerEvents(new ListenerDamage(), this);
         Bukkit.getPluginManager().registerEvents(listenerHealthChange, this);
         Bukkit.getPluginManager().registerEvents(new ListenerItemSpawn(), this);
+        Bukkit.getPluginManager().registerEvents(new me.klop233.sxattribute.listener.ListenerBlockPlace(), this); // LuminolCraft
 
         TempAttributeAPI.startUpdate();
 

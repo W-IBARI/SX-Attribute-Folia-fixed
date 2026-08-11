@@ -84,10 +84,17 @@ public class Damage extends SubAttribute{
                 EntityEquipment eq = attackEntity.getEquipment();
                 ItemStack mainHand = NMS.compareTo(1, 9, 0) >= 0 ? eq.getItemInMainHand() : eq.getItemInHand();
                 if (mainHand != null) {
-                    if (Material.BOW.equals(mainHand.getType()) && !Config.isBowCloseRangeAttack()) {
+                    // 远程武器（弓/弩）的近战攻击不享受其攻击力加成
+                    if ((Material.BOW.equals(mainHand.getType()) || Material.CROSSBOW.equals(mainHand.getType())) && !Config.isBowCloseRangeAttack()) {
                         SXAttributeData sxAttributeData = SXAttribute.getApi().loadItemData(attackEntity, new PreLoadItem(EquipmentType.MAIN_HAND, mainHand));
                         if (NMS.compareTo(1, 9, 0) >= 0) {
-                            damageData.setDamage(event.getDamage() - (values[0] / event.getDamage() * sxAttributeData.getValues(getClass().getSimpleName())[0]));
+                            double totalMinDamage = values[0];
+                            double weaponMinDamage = sxAttributeData.getValues(getClass().getSimpleName())[0];
+                            if (totalMinDamage > 0) {
+                                // 事件伤害已包含暴击/蓄力等倍率，武器贡献按同倍率等比扣除
+                                double weaponContribution = weaponMinDamage * event.getDamage() / totalMinDamage;
+                                damageData.setDamage(Math.max(0, event.getDamage() - weaponContribution));
+                            }
                         }
                         values = damageData.getAttackerData().take(sxAttributeData).getValues(getClass().getSimpleName());
                     }

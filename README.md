@@ -1,3 +1,10 @@
+> 本版本基于 [LuminolCraft/SX-Attribute-Folia](https://github.com/LuminolCraft/SX-Attribute-Folia) 改良：
+>
+> - 升级适配至 Folia / Minecraft 26.2
+> - 修复远程武器伤害计算：
+>   1. 修复弓、弩的近战伤害异常问题（近战不再附加面板攻击力）
+>   2. 将弓的拉弓程度与攻击力绑定，拉弓伤害 = 攻击力 × 拉弓程度²
+
 <h1 align="center">SX-Attribute - 物品属性插件</h1>
 <h5 align="center">
 <a href="#introduction">插件简介</a>&nbsp;&nbsp;

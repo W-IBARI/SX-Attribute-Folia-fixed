@@ -23,13 +23,20 @@ import org.bukkit.event.player.PlayerItemDamageEvent;
 import org.bukkit.inventory.EntityEquipment;
 import org.bukkit.inventory.ItemStack;
 
+import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * @author Saukiya
  */
 
 public class ListenerDamage implements Listener {
+
+    /**
+     * 弓的抛射物 UUID -> 拉弓力度（0.0 ~ 1.0），仅记录普通弓，弩不记录
+     */
+    private final Map<UUID, Float> bowForceMap = new ConcurrentHashMap<>();
 
     @EventHandler
     void onProjectileHitEvent(EntityShootBowEvent event) {
@@ -42,6 +49,12 @@ public class ListenerDamage implements Listener {
             SXAttribute.getApi().setProjectileData(projectile.getUniqueId(), SXAttribute.getAttributeManager().getEntityData(entity));
 
             ItemStack item = event.getBow();
+            if (item != null && item.getType() == Material.BOW) {
+                bowForceMap.put(projectile.getUniqueId(), event.getForce());
+            } else {
+                bowForceMap.remove(projectile.getUniqueId());
+            }
+
             if (item != null && SubCondition.isUnbreakable(item.getItemMeta())) {
                 Bukkit.getPluginManager().callEvent(new PlayerItemDamageEvent((Player) entity, item, 1));
             }
@@ -115,6 +128,15 @@ public class ListenerDamage implements Listener {
                 break;
             }
         }
+
+        Float bowForce = bowForceMap.remove(event.getDamager().getUniqueId());
+        if (bowForce != null) {
+            double drawStrength = Math.max(0.0F, Math.min(1.0F, bowForce));
+            double drawFactor = drawStrength * drawStrength;
+            double panelDamage = damageData.getDamage();
+            damageData.addDamage(panelDamage * (drawFactor - 1.0D), "All");
+        }
+
 //        damageData.setDamage(damageData.getDamage() > Config.getMinimumDamage() ? damageData.getDamage() : Config.getMinimumDamage(), "All");
         Bukkit.getPluginManager().callEvent(new SXDamageEvent(damageData));
 

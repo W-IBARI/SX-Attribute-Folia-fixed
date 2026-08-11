@@ -1,20 +1,17 @@
 plugins {
-    id 'com.github.johnrengelman.shadow' version '8.1.1'
+    id 'com.gradleup.shadow' version '9.4.1'
 }
 
 apply plugin: 'java'
 group 'github.saukiya'
 version '4.0.0-Folia'
 
-    sourceCompatibility = JavaVersion.VERSION_21
-targetCompatibility = JavaVersion.VERSION_21
-
 repositories {
     mavenLocal()
     mavenCentral()
 
     // Minecraft Api
-    maven { url 'https://libraries.minecraft.net'}
+    maven { url 'https://libraries.minecraft.net' }
     // MythicMobs
     maven { url "https://mvn.lumine.io/repository/maven-public/" }
     // bStats-bukkit
@@ -33,20 +30,18 @@ dependencies {
     implementation 'org.bstats:bstats-bukkit:2.2.1'
     compileOnly fileTree('lib')
 
-//    compileOnly 'org.spigotmc:spigot:1.12.1-R0.1-SNAPSHOT'
-    compileOnly "dev.folia:folia-api:1.21.8-R0.1-SNAPSHOT"
-//    compileOnly 'org.spigotmc:spigot:1.17.1-R0.1-SNAPSHOT'
+    compileOnly "dev.folia:folia-api:26.2.build.+"
 
     compileOnly 'com.github.Saukiya:SX-Item:4.4.0'
     compileOnly 'io.lumine.xikage:MythicMobs:4.9.1'
     compileOnly 'com.gmail.filoghost.holographicdisplays:holographicdisplays-api:2.4.9'
     compileOnly 'com.github.MilkBowl:VaultAPI:1.7.1'
-    compileOnly 'org.projectlombok:lombok:1.18.34'
-    annotationProcessor 'org.projectlombok:lombok:1.18.34'
+    compileOnly 'org.projectlombok:lombok:1.18.46'
+    annotationProcessor 'org.projectlombok:lombok:1.18.46'
 
     testCompileOnly fileTree('libs/spigot-1.14')
-    testImplementation 'org.projectlombok:lombok:1.18.34'
-    testAnnotationProcessor 'org.projectlombok:lombok:1.18.34'
+    testImplementation 'org.projectlombok:lombok:1.18.46'
+    testAnnotationProcessor 'org.projectlombok:lombok:1.18.46'
 }
 
 shadowJar {
@@ -73,4 +68,9 @@ def buildCopyTask(String taskName, String destinationDir, String jarSuffix) {
             println "OutputPath: " + destinationDir
         }
     }
+}
+
+tasks.withType(org.gradle.api.tasks.compile.JavaCompile).configureEach {
+    options.encoding = 'UTF-8'
+    options.release = 25
 }

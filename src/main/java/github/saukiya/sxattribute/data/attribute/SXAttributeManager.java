@@ -88,7 +88,7 @@ public class SXAttributeManager implements Listener {
             PreLoadItem preLoadItem = iterator.next();
             List<String> list = new ArrayList<>();
             if (preLoadItem.getItem().getItemMeta().hasLore()) {
-                list = preLoadItem.getItem().getItemMeta().getLore().stream().map(str -> str.split("§X")[0]).filter(str -> str.length() > 0).collect(Collectors.toList());
+                list = preLoadItem.getItem().getItemMeta().getLore().stream().map(str -> str.split("§X", 2)[0]).filter(str -> str.length() > 0).collect(Collectors.toList());
             }
             if (!SXAttribute.getConditionManager().isUse(entity, preLoadItem.getType(), list)) {
                 iterator.remove();
@@ -102,7 +102,7 @@ public class SXAttributeManager implements Listener {
         // LoadAttribute
         for (PreLoadItem preLoadItem : preItemList) {
             if (preLoadItem.getItem().getItemMeta().hasLore()) {
-                attributeData.add(loadListData(preLoadItem.getItem().getItemMeta().getLore().stream().map(str -> str.split("§X")[0]).filter(str -> str.length() > 0).collect(Collectors.toList())));
+                attributeData.add(loadListData(preLoadItem.getItem().getItemMeta().getLore().stream().map(str -> str.split("§X", 2)[0]).filter(str -> str.length() > 0).collect(Collectors.toList())));
             }
         }
 
@@ -120,7 +120,7 @@ public class SXAttributeManager implements Listener {
      */
     public SXAttributeData loadListData(List<String> list) {
         SXAttributeData sxAttributeData = new SXAttributeData();
-        list.stream().map(str -> str.split("§X")[0]).filter(s -> !s.isEmpty()).forEach(s -> {
+        list.stream().map(str -> str.split("§X", 2)[0]).filter(s -> !s.isEmpty()).forEach(s -> {
             for (SubAttribute attribute : SubAttribute.getAttributes()) {
                 attribute.loadAttribute(sxAttributeData.getValues()[attribute.getPriority()], s);
             }

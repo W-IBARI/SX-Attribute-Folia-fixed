@@ -38,12 +38,15 @@ import javax.script.ScriptEngine;
 import javax.script.ScriptEngineManager;
 import javax.script.ScriptException;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
-import java.io.FileReader;
+import java.io.InputStreamReader;
+import java.io.Reader;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
+import java.nio.charset.StandardCharsets;
 import java.text.DecimalFormat;
 import java.util.Arrays;
 import java.util.Map;
@@ -137,7 +140,7 @@ public class SXAttribute extends JavaPlugin {
             saveResource("Attribute/JavaScript/JSAttribute.js", true);
             saveResource("Attribute/SX-Attribute/JSAttribute_JS.yml", true);
         }
-        if (jsAttributeFiles.exists() && jsAttributeFiles.isDirectory() && false) { // 暂时不起作用
+        if (jsAttributeFiles.exists() && jsAttributeFiles.isDirectory()) {
             ScriptEngineManager scriptEngineManager = new ScriptEngineManager();
             if (scriptEngineManager.getEngineByName("js") == null) {
                 if (NMS.hasClass("org.openjdk.nashorn.api.scripting.NashornScriptEngineFactory")) {
@@ -162,7 +165,9 @@ public class SXAttribute extends JavaPlugin {
                     engine.put("Bukkit", bukkit);
                     engine.put("API", api);
                     try {
-                        engine.eval(new FileReader(jsFile));
+                        try (Reader reader = new InputStreamReader(new FileInputStream(jsFile), StandardCharsets.UTF_8)) {
+                            engine.eval(reader);
+                        }
                         new JSAttribute(jsFile.getName().replace(".js", ""), engine).registerAttribute();
                     } catch (ScriptException | FileNotFoundException e) {
                         getLogger().info("========================================================");

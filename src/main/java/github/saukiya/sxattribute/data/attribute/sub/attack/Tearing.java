@@ -49,24 +49,37 @@ public class Tearing extends SubAttribute {
             if (values[0] > 0 && probability(values[0] - damageData.getDefenderData().getValues("Toughness")[0])) {
                 int size = SXAttribute.getRandom().nextInt(3) + 1;
                 double tearingDamage = damageData.getDefender().getHealth() / 100;
-                Bukkit.getGlobalRegionScheduler().runAtFixedRate(getPlugin(), (t) -> {
-                    int i = 0;
-                    i++;
-                    if (i >= 12 / size || damageData.getDefender().isDead() || damageData.getEvent().isCancelled())
-                        t.cancel();
-                    damageData.getDefender().playEffect(EntityEffect.HURT);
-                    EntityDamageByEntityEvent event = new EntityDamageByEntityEvent(damageData.getAttacker(), damageData.getDefender(), EntityDamageEvent.DamageCause.CUSTOM, tearingDamage);
-                    if (!event.isCancelled()) {
-                        double damage = damageData.getDefender().getHealth() < event.getDamage() ? damageData.getDefender().getHealth() : event.getDamage();
-                        damageData.getDefender().setHealth(damageData.getDefender().getHealth() - damage);
-                        if (NMS.compareTo(1,9,0) >= 0) {
-                            damageData.getDefender().getWorld().spawnParticle(Particle.DAMAGE_INDICATOR, damageData.getDefender().getEyeLocation().add(0, -1, 0), 2, 0.2D, 0.2D, 0.2D, 0.1f);
+                // Folia: the repeated damage loop touches defender state, so it
+                // must run on the defender's owning region thread, not the
+                // global scheduler. A per-entity task keeps the interval and
+                // cancels when the defender dies or the event is cancelled.
+                final LivingEntity defender = damageData.getDefender();
+                final LivingEntity attacker = damageData.getAttacker();
+                final EntityDamageByEntityEvent originalEvent = damageData.getEvent();
+                defender.getScheduler().execute(getPlugin(), new Runnable() {
+                    private int tick = 0;
+
+                    @Override
+                    public void run() {
+                        tick++;
+                        if (tick > 12 / size || defender.isDead() || originalEvent.isCancelled()) return;
+                        defender.playEffect(EntityEffect.HURT);
+                        EntityDamageByEntityEvent event = new EntityDamageByEntityEvent(attacker, defender, EntityDamageEvent.DamageCause.CUSTOM, tearingDamage);
+                        if (!event.isCancelled()) {
+                            double damage = defender.getHealth() < event.getDamage() ? defender.getHealth() : event.getDamage();
+                            defender.setHealth(defender.getHealth() - damage);
+                            if (NMS.compareTo(1, 9, 0) >= 0) {
+                                defender.getWorld().spawnParticle(Particle.DAMAGE_INDICATOR, defender.getEyeLocation().add(0, -1, 0), 2, 0.2D, 0.2D, 0.2D, 0.1f);
+                            }
+                            if (attacker instanceof Player) {
+                                ((Player) attacker).playSound(defender.getEyeLocation(), "ENTITY_" + defender.getType().toString() + "_HURT", 1, 1);
+                            }
                         }
-                        if (damageData.getAttacker() instanceof Player) {
-                            ((Player) damageData.getAttacker()).playSound(damageData.getDefender().getEyeLocation(), "ENTITY_" + damageData.getDefender().getType().toString() + "_HURT", 1, 1);
+                        if (tick < 12 / size) {
+                            defender.getScheduler().execute(getPlugin(), this, null, size);
                         }
                     }
-                }, 5, size);
+                }, null, 1L);
                 damageData.sendHolo(getString("Message.Holo", getDf().format(tearingDamage * 12 / size)));
                 send(damageData.getAttacker(), "Message.Battle", damageData.getDefenderName(), getFirstPerson(), getDf().format(tearingDamage * 12 / size));
                 send(damageData.getDefender(), "Message.Battle", getFirstPerson(), damageData.getAttackerName(), getDf().format(tearingDamage * 12 / size));

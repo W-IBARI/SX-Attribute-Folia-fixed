@@ -51,12 +51,23 @@ public class ListenerHealthChange implements Listener, Runnable {
     public void run() {
         for (int i = this.bossList.size() - 1; i >= 0; i--) {
             BossBarData bossBarData = this.bossList.get(i);
+            final LivingEntity entity = bossBarData.getEntity();
 
-            if (bossBarData.getEntity() == null || bossBarData.getEntity().isDead()) {
+            if (entity == null) {
                 bossBarData.getBossBar().removeAll();
                 this.bossList.remove(i);
                 continue;
             }
+
+            // Folia: isDead() is entity state; delegate to the entity thread.
+            // The boss bar is removed there so a dead entity's bar always clears.
+            final int index = i;
+            entity.getScheduler().execute(this.foliaTask.getOwningPlugin(), () -> {
+                if (entity.isDead()) {
+                    bossBarData.getBossBar().removeAll();
+                    this.bossList.remove(bossBarData);
+                }
+            }, null, 1L);
 
             if (bossBarData.clearExpired().getList().isEmpty()) {
                 this.bossList.remove(i);
@@ -67,16 +78,32 @@ public class ListenerHealthChange implements Listener, Runnable {
             NameData nameData = this.nameList.get(i);
             final LivingEntity entity = nameData.getEntity();
 
-            if (entity == null || entity.isDead() || entity.getHealth() == SXAttribute.getApi().getMaxHealth(entity) || nameData.getClearTime() < System.currentTimeMillis()) {
-                if (entity != null) {
-                    entity.getScheduler().execute(this.foliaTask.getOwningPlugin(), () -> {
-                        entity.setCustomName(nameData.getName());
-                        entity.setCustomNameVisible(nameData.isVisible());
-                    }, null, 1L);
-                }
-
+            if (entity == null) {
                 this.nameList.remove(i);
+                continue;
             }
+
+            // Folia: entity state must be read on the entity's owning region
+            // thread. The global task only decides whether a check is due and
+            // delegates the actual health read + name restore to the entity
+            // scheduler; a due entry is removed here (list is thread-safe).
+            if (nameData.getClearTime() < System.currentTimeMillis()) {
+                entity.getScheduler().execute(this.foliaTask.getOwningPlugin(), () -> {
+                    if (entity.isDead()) return;
+                    entity.setCustomName(nameData.getName());
+                    entity.setCustomNameVisible(nameData.isVisible());
+                }, null, 1L);
+                this.nameList.remove(i);
+                continue;
+            }
+
+            entity.getScheduler().execute(this.foliaTask.getOwningPlugin(), () -> {
+                if (entity.isDead() || entity.getHealth() == SXAttribute.getApi().getMaxHealth(entity)) {
+                    entity.setCustomName(nameData.getName());
+                    entity.setCustomNameVisible(nameData.isVisible());
+                    this.nameList.remove(nameData);
+                }
+            }, null, 1L);
         }
 
         for (int i = this.holoList.size() - 1; i >= 0; i--) {
@@ -98,8 +125,10 @@ public class ListenerHealthChange implements Listener, Runnable {
 
         for (NameData nameData : getNameList()) {
             final LivingEntity entity = nameData.getEntity();
-            if (entity != null && !entity.isDead()) {
+            if (entity != null) {
+                // Folia: isDead() must run on the entity's region thread.
                 entity.getScheduler().execute(SXAttribute.getInst(), () -> {
+                    if (entity.isDead()) return;
                     entity.setCustomName(nameData.getName());
                     entity.setCustomNameVisible(nameData.isVisible());
                 }, null, 1L);

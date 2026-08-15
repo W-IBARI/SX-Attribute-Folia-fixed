@@ -43,7 +43,11 @@ public class EventMessage extends SubAttribute implements Listener {
                     if (holoData.getClearTime() < System.currentTimeMillis()) {
                         holoData.delete();
                     } else {
-                        holoData.getHologram().teleport(holoData.getHologram().getLocation().add(0, moveDistance, 0));
+                        // Folia: hologram teleports touch region-bound state;
+                        // schedule on the hologram's location region thread.
+                        final Location loc = holoData.getHologram().getLocation().clone();
+                        Bukkit.getRegionScheduler().execute(getPlugin(), loc, () ->
+                                holoData.getHologram().teleport(loc.add(0, moveDistance, 0)));
                     }
                 }
             }, 20, 2);

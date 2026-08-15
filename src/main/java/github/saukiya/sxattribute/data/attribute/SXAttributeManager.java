@@ -134,7 +134,8 @@ public class SXAttributeManager implements Listener {
      * @param entity Player
      */
     public void attributeUpdateEvent(LivingEntity entity) {
-        Bukkit.getGlobalRegionScheduler().run(SXAttribute.getInst(), (t) -> {
+        if (entity == null) return;
+        Runnable task = () -> {
             UpdateData updateData = new UpdateData(entity);
             SXAttributeData attributeData = getEntityData(entity);
             for (SubAttribute attribute : SubAttribute.getAttributes()) {
@@ -142,7 +143,10 @@ public class SXAttributeManager implements Listener {
                     attribute.eventMethod(attributeData.getValues()[attribute.getPriority()], updateData);
                 }
             }
-        });
+        };
+        // Folia: entity state must be touched on the entity's owning region
+        // thread; the global scheduler is not the owner of any entity.
+        entity.getScheduler().execute(SXAttribute.getInst(), task, null, 1L);
     }
 
     public void loadDefaultAttributeData() {

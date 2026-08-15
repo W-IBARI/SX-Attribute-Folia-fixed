@@ -180,10 +180,12 @@ public class Command extends SubAttribute implements Listener {
                 if (command.startsWith("delay ")) {
                     delay = Integer.parseInt(command.substring(6));
                 } else {
-                    Utils.hackRunDelayed(getPlugin(),
-                            (t) -> Bukkit.dispatchCommand(
-                                    sender, PlaceholderHelper.setPlaceholders(player, command.replace("%player%", player.getName()))
-                            ), delay);
+                    // Folia: player state is touched when resolving placeholders;
+                    // run the command on the player's own region thread.
+                    player.getScheduler().execute(getPlugin(), () -> {
+                        Bukkit.dispatchCommand(
+                                sender, PlaceholderHelper.setPlaceholders(player, command.replace("%player%", player.getName())));
+                    }, null, delay);
                 }
             }
         }
@@ -194,14 +196,16 @@ public class Command extends SubAttribute implements Listener {
                 if (command.startsWith("delay ")) {
                     delay = Integer.parseInt(command.substring(6));
                 } else {
-                    Bukkit.getGlobalRegionScheduler().execute(getPlugin(), () -> {
-                        for (String playerName : players) {
-                            Player player = Bukkit.getPlayerExact(playerName);
-                            if (player != null) {
+                    for (String playerName : players) {
+                        Player player = Bukkit.getPlayerExact(playerName);
+                        if (player != null) {
+                            // Folia: placeholders read player state; dispatch on
+                            // the player's owning region thread.
+                            player.getScheduler().execute(getPlugin(), () -> {
                                 Bukkit.dispatchCommand(sender, PlaceholderHelper.setPlaceholders(player, command.replace("%player%", player.getName())));
-                            }
+                            }, null, delay);
                         }
-                    });
+                    }
                 }
             }
             Utils.hackRunDelayed(getPlugin(), (t) -> run(), delay);

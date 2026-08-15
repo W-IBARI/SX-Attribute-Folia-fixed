@@ -46,21 +46,29 @@ public class HealthRegen extends SubAttribute {
     public void onEnable() {
         runnable = Bukkit.getGlobalRegionScheduler().runAtFixedRate(getPlugin(), (t) -> {
             try {
+                // Folia: player state must be touched on the player's owning
+                // region thread; delegate each player's regen to its scheduler.
                 for (Player player : new ArrayList<>(Bukkit.getOnlinePlayers())) {
-                    if (player != null && !player.isDead() && player.isOnline()) {
-                        double maxHealth = SXAttribute.getApi().getMaxHealth(player);
-                        if (player.getHealth() < maxHealth) {
+                    if (player == null || !player.isOnline()) continue;
+                    player.getScheduler().execute(getPlugin(), () -> {
+                        try {
+                            if (player.isDead()) return;
+                            double maxHealth = SXAttribute.getApi().getMaxHealth(player);
+                            if (player.getHealth() >= maxHealth) return;
                             double healthRegen = SXAttribute.getApi().getEntityData(player).getValues(getName())[0];
-                            if (healthRegen > 0) {
-                                EntityRegainHealthEvent event = new EntityRegainHealthEvent(player, healthRegen, EntityRegainHealthEvent.RegainReason.CUSTOM);
-                                Bukkit.getPluginManager().callEvent(event);
-                                if (!event.isCancelled()) {
-                                    healthRegen = (event.getAmount() + player.getHealth()) > maxHealth ? (maxHealth - player.getHealth()) : event.getAmount();
-                                    player.setHealth(healthRegen + player.getHealth());
-                                }
+                            if (healthRegen <= 0) return;
+                            EntityRegainHealthEvent event = new EntityRegainHealthEvent(player, healthRegen, EntityRegainHealthEvent.RegainReason.CUSTOM);
+                            Bukkit.getPluginManager().callEvent(event);
+                            if (!event.isCancelled()) {
+                                healthRegen = (event.getAmount() + player.getHealth()) > maxHealth ? (maxHealth - player.getHealth()) : event.getAmount();
+                                player.setHealth(healthRegen + player.getHealth());
                             }
+                        } catch (Exception e) {
+                            // Log per-player failures; do not restart the whole
+                            // task from inside the entity scheduler (recursion).
+                            e.printStackTrace();
                         }
-                    }
+                    }, null, 1L);
                 }
             } catch (Exception e) {
                 e.printStackTrace();
